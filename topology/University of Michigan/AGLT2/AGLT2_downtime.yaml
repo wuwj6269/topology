@@ -1132,3 +1132,60 @@
   Services:
   - Squid
 # ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1562745814
+  Description: power outage
+  Severity: Outage
+  StartTime: Aug 05, 2023 22:29 +0000
+  EndTime: Aug 07, 2023 22:29 +0000
+  CreatedTime: Aug 05, 2023 22:29 +0000
+  ResourceName: AGLT2_XRootD_door
+  Services:
+  - XRootD component
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1562746881
+  Description: power outage
+  Severity: Outage
+  StartTime: Aug 05, 2023 22:29 +0000
+  EndTime: Aug 07, 2023 22:29 +0000
+  CreatedTime: Aug 05, 2023 22:31 +0000
+  ResourceName: AGLT2_SE
+  Services:
+  - SRMv2
+  - WebDAV
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1562747215
+  Description: power outage
+  Severity: Outage
+  StartTime: Aug 05, 2023 22:29 +0000
+  EndTime: Aug 07, 2023 22:29 +0000
+  CreatedTime: Aug 05, 2023 22:32 +0000
+  ResourceName: AGLT2_SL7
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1562747467
+  Description: power outage
+  Severity: Outage
+  StartTime: Aug 05, 2023 22:29 +0000
+  EndTime: Aug 07, 2023 22:29 +0000
+  CreatedTime: Aug 05, 2023 22:32 +0000
+  ResourceName: AGLT2_CE_2
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1562747644
+  Description: power outage
+  Severity: Outage
+  StartTime: Aug 05, 2023 22:29 +0000
+  EndTime: Aug 07, 2023 22:29 +0000
+  CreatedTime: Aug 05, 2023 22:32 +0000
+  ResourceName: AGLT2_CE_3
+  Services:
+  - CE
+# ---------------------------------------------------------
+
