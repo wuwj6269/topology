@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
-PYTHONPATH="$PYTHONPATH:$TRAVIS_BUILD_DIR/src"
+# Assume that the repo is unpacked in the current working dir
+REPO_ROOT_DIR=$PWD
+
+PYTHONPATH="$PYTHONPATH:$REPO_ROOT_DIR/src"
 export PYTHONPATH
 
 function verify_xml {
@@ -8,16 +11,34 @@ function verify_xml {
     xml="$1"
     type="$2"
     echo "Validating $type XML schema..."
-    xmllint --noout --schema "$TRAVIS_BUILD_DIR/src/schema/$type.xsd" $xml
+    ret=0
+    xmllint_output=$(xmllint --noout --schema "$REPO_ROOT_DIR/src/schema/$type.xsd" "$xml") || ret=$?
+    if [[ $ret != 0 ]]; then
+        printf "%s\n" "FATAL: XML schema validation failed:" "$xmllint_output"
+    fi
+    return $ret
 }
 
-if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+if [[ $GH_EVENT == 'push' && \
+      $GITHUB_REPOSITORY == 'opensciencegrid/topology' ]]; then
+    # Ensure that the .ssh dir exists
+    mkdir ~/.ssh
+    chmod 0700 ~/.ssh
+    touch ~/.ssh/known_hosts
+    chmod 0600 ~/.ssh/known_hosts
     cat >> ~/.ssh/known_hosts <<EOF
-bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+bitbucket.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPIQmuzMBuKdWeF4+a2sjSSpBK0iqitSQ+5BM9KhpexuGt20JpTVM7u5BDZngncgrqDMbWdxMWWOGtZ9UgbqgZE=
+bitbucket.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIazEu89wgQZ4bqs3d63QSMzYVa0MuJ2e2gKTKqu+UUO
+bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDQeJzhupRu0u0cdegZIa8e86EG2qOCsIsD1Xw0xSeiPDlCr7kq97NLmMbpKTX6Esc30NuoqEEHCuc7yWtwp8dI76EEEB1VqY9QJq6vk+aySyboD5QF61I/1WeTwu+deCbgKMGbUijeXhtfbxSxm6JwGrXrhBdofTsbKRUsrN1WoNgUa8uqN1Vx6WAJw1JHPhglEGGHea6QICwJOAr/6mrui/oB7pkaWKHj3z7d1IC4KWLtY47elvjbaTlkN04Kc/5LFEirorGYVbt15kAUlqGM65pk6ZBxtaO3+30LVlORZkxOh+LKL/BvbZ/iRNhItLqNyieoQj/uh/7Iv4uyH/cV/0b4WDSd3DptigWq84lJubb9t/DnZlrJazxyDCulTmKdOR7vs9gMTo+uoIrPSb8ScTtvw65+odKAlBj59dhnVp9zd7QUojOpXlL62Aw56U4oO+FALuevvMjiWeavKhJqlR7i5n9srYcrNV7ttmDw7kf/97P5zauIhxcjX+xHv4M=
 EOF
 
-    openssl aes-256-cbc -K $encrypted_457175ef53a3_key -iv $encrypted_457175ef53a3_iv -in src/tests/contacts.enc -out contacts -d
+    touch contacts
     chmod 600 contacts
+
+    cat > contacts <<EOF
+$CONTACT_DB_KEY
+EOF
+
     eval `ssh-agent -s`
     ssh-add contacts
     git clone git@bitbucket.org:opensciencegrid/contact.git /tmp/contact
@@ -29,17 +50,17 @@ for DATA_TYPE in miscproject vosummary rgsummary; do
 
     case $DATA_TYPE in
         miscproject)
-            YAML_DIR="$TRAVIS_BUILD_DIR/projects"
+            YAML_DIR="$REPO_ROOT_DIR/projects"
             READER=src/webapp/project_reader.py
             READER_ARGS="$YAML_DIR $CONVERTED_XML"
             ;;
         rgsummary)
-            YAML_DIR="$TRAVIS_BUILD_DIR/topology"
+            YAML_DIR="$REPO_ROOT_DIR/topology"
             READER=src/webapp/rg_reader.py
             READER_ARGS="$YAML_DIR $CONVERTED_XML /tmp/rgdowntime.xml"
             ;;
         vosummary)
-            YAML_DIR="$TRAVIS_BUILD_DIR/virtual-organizations"
+            YAML_DIR="$REPO_ROOT_DIR/virtual-organizations"
             READER=src/webapp/vo_reader.py
             READER_ARGS="$YAML_DIR $CONVERTED_XML"
             ;;
@@ -47,8 +68,9 @@ for DATA_TYPE in miscproject vosummary rgsummary; do
 
     # Resource group and VO readers should use the contact info if we have
     # access to the SSH keys for the contacts repo
-    if [[ $DATA_TYPE == 'vosummary' ]] || [[ $DATA_TYPE == 'rgsummary' ]]; then
-        if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+    if [[ $DATA_TYPE == 'vosummary'  ||  $DATA_TYPE == 'rgsummary' ]]; then
+        if [[ $GH_EVENT == 'push' && \
+              $GITHUB_REPOSITORY == 'opensciencegrid/topology' ]]; then
             READER_ARGS="--contacts $CONTACT_YAML $READER_ARGS"
         fi
     fi

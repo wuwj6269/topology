@@ -8,35 +8,31 @@ Contacts:
   Administrative Contact:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
-  - ID: b78d106207bf13e46d4bb91f15668bfbb54f7904
-    Name: Tanya Levshina
+  - ID: OSG1000018
+    Name: Christina Koch
   Miscellaneous Contact:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
-  - ID: b78d106207bf13e46d4bb91f15668bfbb54f7904
-    Name: Tanya Levshina
+  - ID: OSG1000018
+    Name: Christina Koch
   Registration Authority:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
-  - ID: 51e80537c5f71fa8bee57b6196025fd78c0fde0d
-    Name: Kyle Gross
-  - ID: 8350a764268bd8a041059caaccad8f029720f212
-    Name: Elizabeth Prout
-  - ID: 470d9c00330780912b844f68237482c7b85c1c79
-    Name: Marina Krenz
   Security Contact:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
-  - ID: aab4d60a1efd0b582acad180db315f58a5097933
-    Name: Mine Altunay
+  - ID: OSG1000018
+    Name: Christina Koch
   Sponsors:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
-  - ID: 238d6d2794a7aa5391ae3d13297561a015026bb2
-    Name: Scott Teige
   VO Manager:
   - ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
     Name: Mats Rynge
+Credentials:
+  TokenIssuers:
+    - URL: https://scitokens.org/osg-connect
+      DefaultUnixUser: osg
 Disable: false
 FieldsOfScience:
   PrimaryFields:
@@ -46,54 +42,204 @@ LongName: Open Science Grid
 MembershipServicesURL: https://voms.opensciencegrid.org:8443/voms/osg
 OASIS:
   Managers:
-    Anna Olson:
-      DNs: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Anna Olson 2691
-        OLD
-      ID: 50ea845b806fbbfc2d197c0529b284910992900b
-    Balamurugan Desinghu:
-      DNs:
-      - /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Balamurugan Desinghu
-        2740
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=Balamurugan Desinghu
-        2740
-      ID: e969f836b0039bf711a3452d798aba816b5cf860
-    Benedikt Riedel:
-      DNs:
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=SPT Pole Production
-        Service Certificate
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=Benedikt Riedel
-        2175
-      ID: 78ea3b6350f56c5004290f5df4ba427f6be79199
-    Derek Weitzel:
-      DNs:
-      - /DC=org/DC=doegrids/OU=People/CN=Derek Weitzel 285345
-      - /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Derek Weitzel 605
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=Derek Weitzel
+    - Name: Derek Weitzel
+      DNs: /DC=org/DC=cilogon/C=US/O=University of Nebraska-Lincoln/CN=Derek Weitzel A31419551
       ID: 5d324b2a0011c48462f5c6d981b307e3733cb8b6
-    Lincoln Bryant:
+    - Name: Lincoln Bryant
       DNs:
-      - /DC=org/DC=doegrids/OU=People/CN=Lincoln Bryant 718431
       - /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=lbryant/CN=738076/CN=Lincoln Bryant
       ID: 0a22bab3de2d83d723811e3fb1ebca904e924a97
-    Mats Rynge:
+    - Name: Mats Rynge
       DNs:
-      - /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Mats Rynge 45
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=Mats Rynge 45
+      - /DC=org/DC=cilogon/C=US/O=University of Southern California/CN=Mats Rynge A91316
       ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
-    Suchandra Thapa:
-      DNs:
-      - /DC=org/DC=doegrids/OU=People/CN=Suchandra Thapa 444221
-      - /DC=org/DC=opensciencegrid/O=Open Science Grid/OU=People/CN=Suchandra Thapa
-      ID: bd2e3964b9b7531c09c58fda7702794119e3fc6e
   OASISRepoURLs:
+  - http://cvmfs.xsede.org:8000/cvmfs/colorado.xsede.org
   - http://hcc-cvmfs-repo.unl.edu:8000/cvmfs/singularity.opensciencegrid.org
+  - http://hcc-cvmfs-repo.unl.edu:8000/cvmfs/scitokens.osgstorage.org
+  - http://hcc-cvmfs-repo.unl.edu:8000/cvmfs/sdsc-nrp-osdf-origin.osgstorage.org
   - http://osg-cvmfs.grid.uchicago.edu:8000/cvmfs/veritas.opensciencegrid.org
   - http://osg-cvmfs.grid.uchicago.edu:8000/cvmfs/nexo.opensciencegrid.org
-  - http://osg-cvmfs.grid.uchicago.edu:8000/cvmfs/bnl.opensciencegrid.org
   - http://osg-cvmfs.grid.uchicago.edu:8000/cvmfs/connect.opensciencegrid.org
+  # These are for common software from HSF, which is not a VO, so 
+  #  we include them here in the OSG VO.
+  - http://cvmfs-stratum-zero.cern.ch:8000/cvmfs/sw.hsf.org
+  - http://cvmfs-stratum-zero.cern.ch:8000/cvmfs/sw-nightlies.hsf.org
+  - http://osg-cvmfs.grid.uchicago.edu:8000/cvmfs/snowmass21.opensciencegrid.org
   UseOASIS: true
 PrimaryURL: http://www.opensciencegrid.org
 PurposeURL: http://www.opensciencegrid.org
 ReportingGroups:
 - osg
 SupportURL: http://www.opensciencegrid.org
+DataFederations:
+  StashCache:
+    Namespaces:
+      - Path: /user
+        Authorizations:
+          - PUBLIC
+        AllowedOrigins:
+          - OSGCONNECT_ORIGIN
+        AllowedCaches:
+          - ANY
+      - Path: /osgconnect/public
+        Authorizations:
+          - PUBLIC
+        AllowedOrigins:
+          - OSGCONNECT_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://stash-xrd.osgconnect.net:1094
+      - Path: /osgconnect/protected
+        Authorizations:
+          - SciTokens:
+              Issuer: https://scitokens.org/osg-connect
+              Base Path: /
+              Map Subject: True
+              Restricted Path: /osgconnect
+        AllowedOrigins:
+          - OSGCONNECT_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://stash-xrd.osgconnect.net:1094
+      - Path: /osgconnect/collab
+        Authorizations:
+          - PUBLIC
+        AllowedOrigins:
+          - OSGCONNECT_ORIGIN
+        AllowedCaches:
+          - ANY
+
+      # HACK: enormous hack to get us going on a demo
+      # https://opensciencegrid.atlassian.net/browse/SOFTWARE-5398
+      # FIXME: rip this out after the demo
+      # TODO: Redesign namespace interface (take 3?). See commit body
+      # for considerations.
+
+      # NOTE: The SciTokens blocks for Issuer "https://osg-htc.org/ospool" must be the same
+      # between the paths /ospool/PROTECTED, /s3.amazonaws.com/us-east-1, and
+      # /s3.amazonaws.com/us-west-1 below or we will see problems.
+      # See c3524138ac8d46eee2a3c33cb75fac50acab41c4 for more information.
+
+      - Path: /ospool/PROTECTED
+        Authorizations:
+          - SciTokens:
+              Issuer: https://osg-htc.org/ospool
+              Base Path: /ospool/PROTECTED,/s3.amazonaws.com/us-east-1,/s3.amazonaws.com/us-west-1
+              Map Subject: True
+        AllowedOrigins:
+          - CHTC_OSPOOL_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://origin-auth2001.chtc.wisc.edu:1095
+        DirList: https://origin-auth2001.chtc.wisc.edu:1095
+        CredentialGeneration:
+          Strategy: OAuth2
+          Issuer: https://osg-htc.org/ospool
+          MaxScopeDepth: 4
+
+      - Path: /s3.amazonaws.com/us-east-1
+        Authorizations:
+          - SciTokens:
+              Issuer: https://osg-htc.org/ospool
+              Base Path: /ospool/PROTECTED,/s3.amazonaws.com/us-east-1,/s3.amazonaws.com/us-west-1
+              Map Subject: True
+        AllowedOrigins:
+          - CHTC-ITB-S3-AWS-EAST-ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://s3-us-east-1.osgdev.chtc.io:1095
+        DirList: https://s3-us-east-1.osgdev.chtc.io:1095
+
+      - Path: /s3.amazonaws.com/us-west-1
+        Authorizations:
+          - SciTokens:
+              Issuer: https://osg-htc.org/ospool
+              Base Path: /ospool/PROTECTED,/s3.amazonaws.com/us-east-1,/s3.amazonaws.com/us-west-1
+              Map Subject: True
+        AllowedOrigins:
+          - CHTC-ITB-S3-AWS-WEST-ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://s3-us-west-1.osgdev.chtc.io:1095
+        DirList: https://s3-us-west-1.osgdev.chtc.io:1095
+
+      - Path: /osdftest
+        Authorizations:
+          - PUBLIC
+        AllowedOrigins:
+          - MGHPCC_NRP_OSDF_ORIGIN
+          - NEBRASKA_NRP_OSDF_ORIGIN
+          - SDSC_NRP_OSDF_ORIGIN
+          - SDSC-test-Origin
+          - SINGAPORE_INTERNET2_OSDF_CACHE
+        AllowedCaches:
+          - ANY
+      
+      - Path: /ospool/ap20/data
+        Authorizations:
+          - SciTokens:
+              Issuer: https://ap20.uc.osg-htc.org:1094/ospool/ap20
+              Base Path: /ospool/ap20
+              Map Subject: True
+        AllowedOrigins:
+          - UChicago_OSGConnect_ap20
+        AllowedCaches:
+          - ANY
+        Writeback: https://ap20.uc.osg-htc.org:1095
+        DirList: https://ap20.uc.osg-htc.org:1095
+        CredentialGeneration:
+          Strategy: OAuth2
+          Issuer: https://osg-htc.org/ospool
+          MaxScopeDepth: 4
+      
+      - Path: /ospool/ap21/data
+        Authorizations:
+          - SciTokens:
+              Issuer: https://ap21.uc.osg-htc.org:1094/ospool/ap21
+              Base Path: /ospool/ap21
+              Map Subject: True
+        AllowedOrigins:
+          - UChicago_OSGConnect_ap21
+        AllowedCaches:
+          - ANY
+        Writeback: https://ap21.uc.osg-htc.org:1095
+        DirList: https://ap21.uc.osg-htc.org:1095
+        CredentialGeneration:
+          Strategy: OAuth2
+          Issuer: https://osg-htc.org/ospool
+          MaxScopeDepth: 4
+
+      - Path: /ospool/ap22/data
+        Authorizations:
+          - SciTokens:
+              Issuer: https://ap22.uc.osg-htc.org:1094/ospool/ap22
+              Base Path: /ospool/ap22
+              Map Subject: True
+        AllowedOrigins:
+          - UChicago_OSGConnect_ap22
+        AllowedCaches:
+          - ANY
+        Writeback: https://ap22.uc.osg-htc.org:1095
+        DirList: https://ap22.uc.osg-htc.org:1095
+        CredentialGeneration:
+          Strategy: OAuth2
+          Issuer: https://osg-htc.org/ospool
+          MaxScopeDepth: 4
+
+      - Path: /ospool/uc-shared
+        Authorizations:
+          - SciTokens:
+              Issuer: https://osg-htc.org/ospool/uc-shared
+              Base Path: /ospool/uc-shared
+              Map Subject: True
+        AllowedOrigins:
+          - UChicago_OSGConnect_ap23
+        AllowedCaches:
+          - ANY
+        Writeback: https://ap23.uc.osg-htc.org:1095
+        DirList: https://ap23.uc.osg-htc.org:1095
+        CredentialGeneration:
+          Strategy: OAuth2
+          Issuer: https://osg-htc.org/ospool/uc-shared
+          MaxScopeDepth: 4

@@ -3,11 +3,14 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from logging import getLogger
 import urllib.parse
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
-from .common import MaybeOrderedDict, RGDOWNTIME_SCHEMA_URL, RGSUMMARY_SCHEMA_URL, Filters,\
-    is_null, expand_attr_list_single, expand_attr_list, ensure_list
-from .contacts_reader import ContactsData
+import icalendar
+
+from .common import RGDOWNTIME_SCHEMA_URL, RGSUMMARY_SCHEMA_URL, Filters, ParsedYaml,\
+    is_null, expand_attr_list_single, expand_attr_list, ensure_list, XROOTD_ORIGIN_SERVER, XROOTD_CACHE_SERVER
+from .contacts_reader import ContactsData, User
+from .exceptions import DataError
 
 GRIDTYPE_1 = "OSG Production Resource"
 GRIDTYPE_2 = "OSG Integration Test Bed Resource"
@@ -36,9 +39,29 @@ class Facility(object):
     def __init__(self, name: str, id: int):
         self.name = name
         self.id = id
+        self.sites_by_name = dict()
 
     def get_tree(self) -> OrderedDict:
-        return OrderedDict([("ID", self.id), ("Name", self.name)])
+        return OrderedDict([
+            ("ID", self.id),
+            ("Name", self.name),
+            ("IsCCStar", self.is_ccstar)
+        ])
+
+    def add_site(self, site: 'Site'):
+        self.sites_by_name[site.name] = site
+        try:
+            del self._is_ccstar
+        except AttributeError:
+            pass
+
+    @property
+    def is_ccstar(self):
+        """Check if any sites in this facility are tagged CC*"""
+        if not hasattr(self, "_is_ccstar"):
+            self._is_ccstar = any(site.is_ccstar for site in self.sites_by_name.values())
+
+        return self._is_ccstar
 
 
 class Site(object):
@@ -47,6 +70,7 @@ class Site(object):
         self.name = name
         self.id = id
         self.facility = facility
+        self.resource_groups_by_name = {}
         self.other_data = site_info
         if "ID" in self.other_data:
             del self.other_data["ID"]
@@ -54,11 +78,31 @@ class Site(object):
     def get_tree(self) -> OrderedDict:
         # Sort the other_data
         sorted_other_data = sorted(list(self.other_data.items()), key=lambda tup: tup[0])
-        return OrderedDict([("ID", self.id), ("Name", self.name)] + sorted_other_data)
+        return OrderedDict(
+            [
+                ("ID", self.id),
+                ("Name", self.name),
+                ("IsCCStar", self.is_ccstar)
+            ] + sorted_other_data
+        )
 
+    def add_resource_group(self, resource_group: 'ResourceGroup'):
+        self.resource_groups_by_name[resource_group.name] = resource_group
+        try:
+            del self._is_ccstar
+        except AttributeError:
+            pass
+
+    @property
+    def is_ccstar(self):
+        """Check if any resource groups in this site are tagged CC*"""
+        if not hasattr(self, "_is_ccstar"):
+            self._is_ccstar = any(resource_group.is_ccstar for resource_group in self.resource_groups_by_name.values())
+
+        return self._is_ccstar
 
 class Resource(object):
-    def __init__(self, name: str, yaml_data: Dict, common_data: CommonData):
+    def __init__(self, name: str, yaml_data: ParsedYaml, common_data: CommonData):
         self.name = name
         self.service_types = common_data.service_types
         self.common_data = common_data
@@ -70,12 +114,88 @@ class Resource(object):
         self.data = yaml_data
         if is_null(yaml_data, "FQDN"):
             raise ValueError(f"Resource {name} does not have an FQDN")
+        self.fqdn = self.data["FQDN"]
+        self.id = self.data["ID"]
 
-    @property
-    def fqdn(self):
-        return self.data["FQDN"]
+    def get_stashcache_files(self, global_data, legacy):
+        """Gets a resources Cache files as a dictionary"""
+        # TODO Cache this.
 
-    def get_tree(self, authorized=False, filters: Filters = None) -> MaybeOrderedDict:
+        # Until https://opensciencegrid.atlassian.net/browse/SOFTWARE-5276, skip LIGO DNs
+        # because otherwise each file hits the LIGO LDAP server.
+        legacy = False
+
+        import stashcache
+        cache_file_generators_and_file_names = [
+            (
+                lambda resource: stashcache.generate_public_cache_authfile(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    legacy=legacy,
+                    suppress_errors=False
+                ), "CacheAuthfilePublic"
+            ),
+            (
+                lambda resource: stashcache.generate_cache_authfile(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    legacy=legacy,
+                    suppress_errors=False
+                ), "CacheAuthfile"
+            ),
+            (
+                lambda resource: stashcache.generate_cache_scitokens(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    suppress_errors=False
+                ), "CacheScitokens"
+            ),
+        ]
+        origin_file_generators_and_file_names = [
+            (
+                lambda resource: stashcache.generate_origin_authfile(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    suppress_errors=False,
+                    public_origin=True
+                ), "OriginAuthfilePublic"
+            ),
+            (
+                lambda resource: stashcache.generate_origin_authfile(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    suppress_errors=False,
+                    public_origin=False
+                ), "OriginAuthfile"
+            ),
+            (
+                lambda resource: stashcache.generate_origin_scitokens(
+                    global_data,
+                    fqdn=resource.fqdn,
+                    suppress_errors=False
+                ), "OriginScitokens"
+            ),
+        ]
+
+        stashcache_files = {}
+        if XROOTD_CACHE_SERVER in self.service_names:
+            for (file_generator, file_name) in cache_file_generators_and_file_names:
+                try:
+                    stashcache_files[file_name] = file_generator(self)
+                except (ValueError, DataError):
+                    continue
+        if XROOTD_ORIGIN_SERVER in self.service_names:
+            for (file_generator, file_name) in origin_file_generators_and_file_names:
+                try:
+                    stashcache_files[file_name] = file_generator(self)
+                except (ValueError, DataError):
+                    continue
+
+        stashcache_files = {k: v for k, v in stashcache_files.items() if v}  # Remove empty dicts
+
+        return stashcache_files
+
+    def get_tree(self, authorized=False, filters: Filters = None) -> Optional[OrderedDict]:
         if filters is None:
             filters = Filters()
 
@@ -85,11 +205,12 @@ class Resource(object):
             "Disable": False,
             "VOOwnership": "(Information not available)",
             "WLCGInformation": "(Information not available)",
+            "IsCCStar": self.is_ccstar
         }
 
-        new_res = OrderedDict.fromkeys(["ID", "Name", "Active", "Disable", "Services", "Description",
-                                        "FQDN", "FQDNAliases", "VOOwnership",
-                                        "WLCGInformation", "ContactLists"])
+        new_res = OrderedDict.fromkeys(["ID", "Name", "Active", "Disable", "Services", "Tags",
+                                        "Description", "FQDN", "FQDNAliases", "VOOwnership",
+                                        "WLCGInformation", "ContactLists", "IsCCStar"])
         new_res.update(defaults)
         new_res.update(self.data)
 
@@ -125,8 +246,32 @@ class Resource(object):
             new_res["WLCGInformation"] = self._expand_wlcginformation(self.data["WLCGInformation"])
         elif filters.has_wlcg is True:
             return
+        if "Tags" in self.data:
+            new_res["Tags"] = self._expand_tags(self.data["Tags"])
+
+        # The topology XML schema cannot handle this additional data.  Given how inflexible
+        # the XML has been (and mostly seen as there for backward compatibility), this simply
+        # removes the data from the XML format.
+        if 'DN' in new_res:
+            del new_res['DN']
+        if 'AllowedVOs' in new_res:
+            del new_res['AllowedVOs']
 
         return new_res
+
+    @property
+    def is_active(self):
+        """Check if the Resource is active and not disabled"""
+        return self.data.get("Active", True) and not self.data.get("Disable", False)
+
+    @property
+    def is_ccstar(self):
+        """Check if this site is tagged as a CC* Site"""
+        if not hasattr(self, "_is_ccstar"):
+            self._is_ccstar = "CC*" in self.data.get("Tags", [])
+
+        return self._is_ccstar
+
 
     def _expand_services(self, services: Dict) -> List[OrderedDict]:
         services_list = expand_attr_list(services, "Name", ordering=["Name", "Description", "Details"])
@@ -134,6 +279,9 @@ class Resource(object):
             svc["ID"] = self.service_types[svc["Name"]]
             svc.move_to_end("ID", last=False)
         return services_list
+
+    def _expand_tags(self, tags: List) -> Dict[str, list]:
+        return {"Tag": tags}
 
     @staticmethod
     def _expand_voownership(voownership: Dict) -> OrderedDict:
@@ -177,13 +325,14 @@ class Resource(object):
             contact_data = expand_attr_list(contact_data, "ContactRank", ["Name", "ID", "ContactRank"], ignore_missing=True)
             for contact in contact_data:
                 contact_id = contact.pop("ID", None)  # ID is for internal use - don't put it in the results
-                if authorized and self.common_data.contacts:
-                    if contact_id in self.common_data.contacts.users_by_id:
-                        extra_data = self.common_data.contacts.users_by_id[contact_id]
-                        contact["Email"] = extra_data.email
-                        contact["Phone"] = extra_data.phone
-                        contact["SMSAddress"] = extra_data.sms_address
-                        dns = extra_data.dns
+                if self.common_data.contacts and contact_id in self.common_data.contacts.users_by_id:
+                    user = self.common_data.contacts.users_by_id[contact_id]  # type: User
+                    contact["CILogonID"] = user.cilogon_id
+                    if authorized:
+                        contact["Email"] = user.email
+                        contact["Phone"] = user.phone
+                        contact["SMSAddress"] = user.sms_address
+                        dns = user.dns
                         if dns:
                             contact["DN"] = dns[0]
                         contact.move_to_end("ContactRank", last=True)
@@ -200,38 +349,44 @@ class Resource(object):
 
         new_wlcg = OrderedDict.fromkeys(["InteropBDII", "LDAPURL", "InteropMonitoring", "InteropAccounting",
                                          "AccountingName", "KSI2KMin", "KSI2KMax", "StorageCapacityMin",
-                                         "StorageCapacityMax", "HEPSPEC", "APELNormalFactor", "TapeCapacity"])
+                                         "StorageCapacityMax", "HEPSPEC", "APELNormalFactor", "HEPScore23Percentage", "TapeCapacity"])
         new_wlcg.update(defaults)
         new_wlcg.update(wlcg)
+        if new_wlcg["HEPScore23Percentage"] is None:
+            del new_wlcg["HEPScore23Percentage"]
         return new_wlcg
 
 
 class ResourceGroup(object):
-    def __init__(self, name: str, yaml_data: Dict, site: Site, common_data: CommonData):
+    def __init__(self, name: str, yaml_data: ParsedYaml, site: Site, common_data: CommonData):
         self.name = name
         self.site = site
         self.service_types = common_data.service_types
         self.common_data = common_data
+        self.production = yaml_data.get("Production", "")
 
         scname = yaml_data["SupportCenter"]
         scid = int(common_data.support_centers[scname]["ID"])
         self.support_center = OrderedDict([("ID", scid), ("Name", scname)])
 
-        self.resources = []
+        self.resources_by_name = {}
         for name, res in yaml_data["Resources"].items():
             try:
                 if not isinstance(res, dict):
                     raise TypeError("expecting a dict")
-                res = Resource(name, res, self.common_data)
-                self.resources.append(res)
+                res_obj = Resource(name, ParsedYaml(res), self.common_data)
+                self.resources_by_name[name] = res_obj
             except (AttributeError, KeyError, TypeError, ValueError) as err:
-                log.exception("Error with resource %s: %s", name, err)
+                log.exception("Error with resource %s: %r", name, err)
                 continue
-        self.resources.sort(key=lambda x: x.name)
 
         self.data = yaml_data
 
-    def get_tree(self, authorized=False, filters: Filters = None) -> MaybeOrderedDict:
+    @property
+    def resources(self):
+        return [self.resources_by_name[k] for k in sorted(self.resources_by_name)]
+
+    def get_tree(self, authorized=False, filters: Filters = None) -> Optional[OrderedDict]:
         if filters is None:
             filters = Filters()
         for filter_list, attribute in [(filters.facility_id, self.site.facility.id),
@@ -251,14 +406,14 @@ class ResourceGroup(object):
                 if tree:
                     filtered_resources.append(tree)
             except (AttributeError, KeyError, ValueError) as err:
-                log.exception("Error with resource %s: %s", res.name, err)
+                log.exception("Error with resource %s: %r", res.name, err)
                 continue
         if not filtered_resources:
             return  # all resources filtered out
         try:
             filtered_data = self._expand_rg()
         except (AttributeError, KeyError, ValueError) as err:
-            log.exception("Error with resource group %s/%s: %s", self.site, self.name, err)
+            log.exception("Error with resource group %s/%s: %r", self.site, self.name, err)
             return
         filtered_data["Resources"] = {"Resource": filtered_resources}
         return filtered_data
@@ -271,9 +426,17 @@ class ResourceGroup(object):
     def key(self):
         return (self.site.name, self.name)
 
+    @property
+    def is_ccstar(self):
+        """Check if any resources in this resource group are tagged CC*"""
+        if not hasattr(self, "_is_ccstar"):
+            self._is_ccstar = any(resource.is_ccstar for resource in self.resources_by_name.values())
+
+        return self._is_ccstar
+
     def _expand_rg(self) -> OrderedDict:
         new_rg = OrderedDict.fromkeys(["GridType", "GroupID", "GroupName", "Disable", "Facility", "Site",
-                                       "SupportCenter", "GroupDescription"])
+                                       "SupportCenter", "GroupDescription", "IsCCStar"])
         new_rg.update({"Disable": False})
         new_rg.update(self.data)
 
@@ -281,7 +444,8 @@ class ResourceGroup(object):
         new_rg["Site"] = self.site.get_tree()
         new_rg["GroupName"] = self.name
         new_rg["SupportCenter"] = self.support_center
-        production = new_rg.pop("Production")
+        new_rg["IsCCStar"] = self.is_ccstar
+        production = new_rg.get("Production")
         if production:
             new_rg["GridType"] = GRIDTYPE_1
         else:
@@ -294,14 +458,22 @@ class Downtime(object):
     TIME_OUTPUT_FMT = "%b %d, %Y %H:%M %p %Z"
     PREFERRED_TIME_FMT = "%b %d, %Y %H:%M %z"  # preferred format, e.g. "Mar 7, 2017 03:00 -0500"
 
-    def __init__(self, rg: ResourceGroup, yaml_data: Dict):
+    def __init__(self, rg: ResourceGroup, yaml_data: ParsedYaml, common_data: CommonData):
         self.rg = rg
         self.data = yaml_data
+        for k in ["StartTime", "EndTime", "ID", "Class", "Severity", "ResourceName", "Services"]:
+            if is_null(yaml_data, k):
+                raise ValueError(k)
         self.start_time = self.parsetime(yaml_data["StartTime"])
         self.end_time = self.parsetime(yaml_data["EndTime"])
         self.created_time = None
         if not is_null(yaml_data, "CreatedTime"):
             self.created_time = self.parsetime(yaml_data["CreatedTime"])
+        self.res_name = yaml_data["ResourceName"]
+        self.res = rg.resources_by_name[self.res_name]
+        self.service_names = yaml_data["Services"]
+        self.service_ids = [common_data.service_types[x] for x in yaml_data["Services"]]
+        self.id = yaml_data["ID"]
 
     @property
     def timeframe(self) -> Timeframe:
@@ -322,7 +494,7 @@ class Downtime(object):
         current_time = datetime.now(timezone.utc)
         return current_time - self.end_time
 
-    def get_tree(self, filters: Filters = None) -> MaybeOrderedDict:
+    def _is_shown(self, filters) -> bool:
         if filters is None:
             filters = Filters()
         for filter_list, attribute in [(filters.facility_id, self.rg.site.facility.id),
@@ -330,49 +502,71 @@ class Downtime(object):
                                        (filters.support_center_id, self.rg.support_center["ID"]),
                                        (filters.rg_id, self.rg.id)]:
             if filter_list and attribute not in filter_list:
-                return
+                return False
+
         rg_data_gridtype = GRIDTYPE_1 if self.rg.data.get("Production", None) else GRIDTYPE_2
         if filters.grid_type is not None and rg_data_gridtype != filters.grid_type:
-            return
+            return False
+
         # unlike the other filters, if past_days is not specified, _no_ past downtime is shown
         if filters.past_days >= 0:
             # Filter out downtimes older than 'past_days'
             # (current & future downtimes are not filtered out)
             if self.end_age.total_seconds() > filters.past_days * 86400:
-                return
+                return False
 
-        return self._expand_downtime(filters.service_id)
+        if filters.service_id:
+            if not set(filters.service_id).intersection(set(self.service_ids)):
+                return False
 
-    def _expand_downtime(self, service_filter=None) -> MaybeOrderedDict:
+        return True
+
+    def get_tree(self, filters: Filters = None) -> Optional[OrderedDict]:
+        if self._is_shown(filters):
+            return self._expand_downtime(filters.service_id)
+
+    def get_ical_event(self, filters: Filters = None) -> Optional[icalendar.Event]:
+        if not self._is_shown(filters):
+            return None
+
+        evt = icalendar.Event()
+        try:
+            evt["uid"] = str(self.data.get("ID", 0))
+            evt.add("dtstart", self.start_time)
+            evt.add("dtend", self.end_time)
+            evt["summary"] = f"{self.rg.name} / {self.res.name}"
+            affected_services = ", ".join(self.service_names)
+            evt["description"] = (f"Class: {self.data['Class']}\n"
+                                  f"Severity: {self.data['Severity']}\n"
+                                  f"Affected Services: {affected_services}\n"
+                                  f"Description: {self.data['Description']}")
+        except (KeyError, ValueError, AttributeError) as e:
+            log.warning("Malformed downtime: %r", e)
+            return None
+
+        return evt
+
+    def _expand_downtime(self, service_filter=None) -> Optional[OrderedDict]:
         new_downtime = OrderedDict.fromkeys(["ID", "ResourceID", "ResourceGroup", "ResourceName", "ResourceFQDN",
                                              "StartTime", "EndTime", "Class", "Severity", "CreatedTime", "UpdateTime",
                                              "Services", "Description"])
         new_downtime["ResourceGroup"] = OrderedDict([("GroupName", self.rg.name),
                                                      ("GroupID", self.rg.id)])
-        for r in self.rg.resources:
-            if r.name == self.data["ResourceName"]:
-                new_downtime["ResourceFQDN"] = r.data["FQDN"]
-                new_downtime["ResourceID"] = r.data["ID"]
-                new_downtime["ResourceName"] = r.name
-                services = ensure_list(r.services)
-                break
-        else:
-            log.warning("Resource %s does not exist -- ignoring downtime", new_downtime["ResourceName"])
-            return None
+        new_downtime["ResourceFQDN"] = self.res.fqdn
+        new_downtime["ResourceID"] = self.res.id
+        new_downtime["ResourceName"] = self.res.name
 
         new_services = []
-        for dts in self.data["Services"]:
-            for s in services:
-                if s["Name"] == dts:
-                    if not service_filter or s["ID"] in service_filter:
+        for dt_service_name in self.service_names:
+            for res_service in ensure_list(self.res.services):
+                if res_service["Name"] == dt_service_name:
+                    if not service_filter or res_service["ID"] in service_filter:
                         new_services.append(OrderedDict([
-                            ("ID", s["ID"]),
-                            ("Name", s["Name"]),
-                            ("Description", s["Description"])
+                            ("ID", res_service["ID"]),
+                            ("Name", res_service["Name"]),
+                            ("Description", res_service["Description"])
                         ]))
                     break
-            else:
-                pass
 
         if new_services:
             new_downtime["Services"] = {"Service": new_services}
@@ -388,8 +582,9 @@ class Downtime(object):
         new_downtime["StartTime"] = self.fmttime(self.start_time)
         new_downtime["EndTime"] = self.fmttime(self.end_time)
 
-        for k in ["ID", "Class", "Severity", "Description"]:
-            new_downtime[k] = self.data.get(k, None)
+        for k in ["ID", "Class", "Severity"]:
+            new_downtime[k] = self.data[k]
+        new_downtime["Description"] = self.data.get("Description")
 
         return new_downtime
 
@@ -442,26 +637,46 @@ class Topology(object):
         self.sites = {}
         # rgs are keyed by (site_name, rg_name) tuple
         self.rgs = {}  # type: Dict[Tuple[str, str], ResourceGroup]
-        self.resources_by_facility = defaultdict(list)
+        self.resources_by_facility = defaultdict(list)        # type: defaultdict[str, List[Resource]]
+        self.resources_by_resource_group = defaultdict(list)  # type: defaultdict[str, List[str]]
+        # ^^ should have called it resource_names_by_resource_group, sorry.  -mat
+        self.resources_by_fqdn = defaultdict(list)  # type: defaultdict[str, List[Resource]]
+        self.sites_by_facility = defaultdict(set)
+        self.resource_group_by_site = defaultdict(set)
         self.service_names_by_resource = {}  # type: Dict[str, List[str]]
+        self.downtime_path_by_resource_group = defaultdict(set)
         self.downtime_path_by_resource = {}
+        self.present_downtimes_by_resource = defaultdict(list)  # type: defaultdict[str, List[Downtime]]
 
-    def add_rg(self, facility_name, site_name, name, parsed_data):
+    def add_rg(self, facility_name: str, site_name: str, name: str, parsed_data: ParsedYaml):
         try:
             rg = ResourceGroup(name, parsed_data, self.sites[site_name], self.common_data)
             self.rgs[(site_name, name)] = rg
+            self.resource_group_by_site[site_name].add(rg.name)
+            self.sites[site_name].add_resource_group(rg)
             for r in rg.resources:
                 self.resources_by_facility[facility_name].append(r)
+                self.resources_by_resource_group[rg.name].append(r.name)
+                self.resources_by_fqdn[r.fqdn.lower()].append(r)
+                self.sites_by_facility[facility_name].add(site_name)
                 self.service_names_by_resource[r.name] = r.service_names
                 self.downtime_path_by_resource[r.name] = f"{facility_name}/{site_name}/{name}_downtime.yaml"
         except (AttributeError, KeyError, ValueError) as err:
-            log.exception("RG %s, %s error: %s; skipping", site_name, name, err)
+            log.exception("RG %s, %s error: %r; skipping", site_name, name, err)
 
     def add_facility(self, name, id):
         self.facilities[name] = Facility(name, id)
 
     def add_site(self, facility_name, name, id, site_info):
-        self.sites[name] = Site(name, id, self.facilities[facility_name], site_info)
+        site = Site(name, id, self.facilities[facility_name], site_info)
+        self.facilities[facility_name].add_site(site)
+        self.sites[name] = site
+
+    def get_resource_group_list(self):
+        """
+        Simple getter for an iterator of resource group objects associated with this topology.
+        """
+        return self.rgs.values()
 
     def get_resource_summary(self, authorized=False, filters: Filters = None) -> Dict:
         if filters is None:
@@ -494,7 +709,7 @@ class Topology(object):
                 try:
                     dttree = dt.get_tree(filters)
                 except (AttributeError, KeyError, ValueError) as err:
-                    log.exception("Error with downtime %s: %s", dt, err)
+                    log.exception("Error with downtime %s: %r", dt, err)
                     continue
                 if dttree:
                     dtlist.append(dttree)
@@ -503,15 +718,45 @@ class Topology(object):
 
         return tree
 
-    def add_downtime(self, sitename: str, rgname: str, downtime: Dict):
+    def get_downtimes_ical(self, authorized=False, filters: Filters = None) -> icalendar.Calendar:
+        _ = authorized
+        if filters is None:
+            filters = Filters()
+
+        cal = icalendar.Calendar()
+        cal.add("prodid", "-//Open Science Grid//Topology//EN")
+        cal.add("version", "2.0")
+
+        for tf in [Timeframe.PAST, Timeframe.PRESENT, Timeframe.FUTURE]:
+            for dt in self.downtimes_by_timeframe[tf]:
+                try:
+                    event = dt.get_ical_event(filters)
+                except (AttributeError, KeyError, ValueError) as err:
+                    log.exception("Error with downtime %s: %r", dt, err)
+                    continue
+                if event:
+                    cal.add_component(event)
+
+        return cal
+
+    def add_downtime(self, sitename: str, rgname: str, downtime: ParsedYaml):
         try:
             rg = self.rgs[(sitename, rgname)]
         except KeyError:
             log.warning("RG %s/%s does not exist -- skipping downtime", sitename, rgname)
             return
         try:
-            dt = Downtime(rg, downtime)
-        except ValueError as err:
-            log.warning("Invalid data in downtime -- skipping: %s", err)
+            dt = Downtime(rg, downtime, self.common_data)
+        except (KeyError, ValueError) as err:
+            log.warning("Invalid or missing data in downtime -- skipping: %r", err)
             return
         self.downtimes_by_timeframe[dt.timeframe].append(dt)
+        if dt.timeframe == Timeframe.PRESENT:
+            self.present_downtimes_by_resource[dt.res_name].append(dt)
+
+    def safe_get_resource_by_fqdn(self, fqdn: str) -> Optional[Resource]:
+        """Returns the first resource that has the given FQDN or None if no such resource exists."""
+        try:
+            return self.resources_by_fqdn[fqdn.lower()][0]
+        except (KeyError, IndexError):
+            return None

@@ -1,0 +1,109 @@
+- Class: SCHEDULED
+  ID: 181068982
+  Description: Update
+  Severity: Outage
+  StartTime: Mar 23, 2019 08:00 +0000
+  EndTime: Mar 24, 2019 20:00 +0000
+  CreatedTime: Mar 20, 2019 13:34 +0000
+  ResourceName: OSG_US_AMNH_ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 469790101
+  Description: Taken offline due to water leak in data center
+  Severity: Outage
+  StartTime: Feb 16, 2020 01:00 +0000
+  EndTime: Feb 18, 2020 15:30 +0000
+  CreatedTime: Feb 20, 2020 21:44 +0000
+  ResourceName: OSG_US_AMNH_ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 483627534
+  Description: HVAC maintenance
+  Severity: Outage
+  StartTime: Mar 06, 2020 16:00 +0000
+  EndTime: Mar 09, 2020 10:00 +0000
+  CreatedTime: Mar 04, 2020 16:59 +0000
+  ResourceName: OSG_US_AMNH_ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 778104154
+  Description: Cooling system maintenance
+  Severity: Outage
+  StartTime: Feb 20, 2021 12:00 +0000
+  EndTime: Feb 24, 2021 17:00 +0000
+  CreatedTime: Feb 08, 2021 18:53 +0000
+  ResourceName: AMNH-ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 778115364
+  Description: Cooling system maintenance
+  Severity: Outage
+  StartTime: Feb 20, 2021 12:00 +0000
+  EndTime: Feb 24, 2021 17:00 +0000
+  CreatedTime: Feb 08, 2021 19:12 +0000
+  ResourceName: AMNH-HEL
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 778115497
+  Description: Cooling system maintenance
+  Severity: Outage
+  StartTime: Feb 20, 2021 12:00 +0000
+  EndTime: Feb 24, 2021 17:00 +0000
+  CreatedTime: Feb 08, 2021 19:12 +0000
+  ResourceName: AMNH-Mendel
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1132244680
+  Description: Power failure
+  Severity: Outage
+  StartTime: Mar 25, 2022 12:00 +0000
+  EndTime: Mar 25, 2022 17:00 +0000
+  CreatedTime: Mar 25, 2022 16:07 +0000
+  ResourceName: OSG_US_AMNH_ARES
+  Services:
+  - CE
+- Class: UNSCHEDULED
+  ID: 1374126383
+  Description: Conversion issues
+  Severity: Outage
+  StartTime: Dec 30, 2022 15:03 +0000
+  EndTime: Jan 06, 2023 17:00 +0000
+  CreatedTime: Dec 30, 2022 15:03 +0000
+  ResourceName: AMNH-ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 1402834530
+  Description: Slurm Update
+  Severity: Outage
+  StartTime: Feb 07, 2023 14:00 +0000
+  EndTime: Feb 08, 2023 14:00 +0000
+  CreatedTime: Feb 01, 2023 20:30 +0000
+  ResourceName: AMNH-ARES
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 1487299724
+  Description: HW maintenance
+  Severity: Outage
+  StartTime: May 15, 2023 13:00 +0000
+  EndTime: May 17, 2023 09:00 +0000
+  CreatedTime: May 10, 2023 14:46 +0000
+  ResourceName: AMNH-ARES
+  Services:
+  - CE
+# ---------------------------------------------------------

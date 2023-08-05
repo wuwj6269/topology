@@ -1,0 +1,44 @@
+- Class: UNSCHEDULED
+  ID: 961126261
+  Description: bringing this down until we can figure out cluster disk usage issue
+  Severity: Outage
+  StartTime: Sep 08, 2021 10:00 +0000
+  EndTime: Sep 09, 2021 10:00 +0000
+  CreatedTime: Sep 08, 2021 14:50 +0000
+  ResourceName: CHTC-canary2
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 961985988
+  Description: bringing this down until we can figure out cluster disk usage issue
+  Severity: Outage
+  StartTime: Sep 09, 2021 09:50 +0000
+  EndTime: Sep 14, 2021 09:50 +0000
+  CreatedTime: Sep 09, 2021 14:43 +0000
+  ResourceName: CHTC-canary2
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: SCHEDULED
+  ID: 1172966228
+  Description: SLURM upgrade
+  Severity: Outage
+  StartTime: May 17, 2022 11:00 +0000
+  EndTime: May 17, 2022 17:00 +0000
+  CreatedTime: May 11, 2022 19:17 +0000
+  ResourceName: CHTC-canary2
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1421785006
+  Description: Auth issues at the site
+  Severity: Outage
+  StartTime: Feb 23, 2023 18:54 +0000
+  EndTime: Mar 10, 2023 15:00 +0000
+  CreatedTime: Feb 23, 2023 18:55 +0000
+  ResourceName: CHTC-canary2
+  Services:
+  - CE
+# ---------------------------------------------------------

@@ -1,0 +1,26 @@
+Production: true
+SupportCenter: Community Support Center
+GroupDescription: Stashcaches located at KISTI and handled through kubernetes PRP
+GroupID: 509
+Resources:
+  Stashcache-KISTI:
+    Active: true
+    Description: KISTI StashCache
+    ID: 1344
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          Name: Fabio Andrijauskas
+          ID: OSG1000162
+      # Security Contact is one to three people to contact regarding security issues
+      Security Contact:
+        Primary:
+          Name: Fabio Andrijauskas
+          ID: OSG1000162
+    FQDN: daejeon-kreonet-net.nationalresearchplatform.org
+    DN: /DC=org/DC=incommon/C=US/ST=California/O=University of California, San Diego/CN=daejeon-kreonet-net.nationalresearchplatform.org
+    Services:
+      XRootD cache server:
+        Description: KISTI PRP Caching Service
+    AllowedVOs:
+      - ANY

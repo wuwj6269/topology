@@ -1,12 +1,15 @@
-#!/usr/bin/env python
-
-from __future__ import print_function
+#!/usr/bin/env python3
 
 import glob
 import yaml
 import sys
 import os
 import re
+
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
 
 _topdir = os.path.abspath(os.path.dirname(__file__) + "/../..")
 sys.path.append(_topdir + "/src")
@@ -15,7 +18,7 @@ from webapp import topology
 
 def load_yaml_file(fname, errors):
     try:
-        yml = yaml.safe_load(open(fname))
+        yml = yaml.load(open(fname), Loader=SafeLoader)
         if yml is None:
             errors.append("YAML file is empty or invalid: %s", fname)
         return yml
@@ -51,8 +54,8 @@ def validate_downtime_file(dt_fname):
             dt_start = topology.Downtime.parsetime(downtime['StartTime'])
             dt_end   = topology.Downtime.parsetime(downtime['EndTime'])
 
-            if dt_start >= dt_end:
-                add_err("StartTime does not precede EndTime: '%s' -> '%s'" %
+            if dt_start > dt_end:
+                add_err("StartTime is after EndTime: '%s' -> '%s'" %
                         (downtime['StartTime'], downtime['EndTime']))
 
         except ValueError as e:
@@ -71,7 +74,7 @@ def main():
 
     downtime_filenames = sorted(glob.glob("*/*/*_downtime.yaml"))
 
-    services = yaml.load(open("services.yaml"))
+    services = yaml.load(open("services.yaml"), Loader=SafeLoader)
 
     errors = []
     for dt_fname in downtime_filenames:
@@ -81,7 +84,7 @@ def main():
     if errors:
         print("%d errors encountered:" % len(errors))
         for e in errors:
-            print(e, file=sys.stderr)
+            print("ERROR: %s" % e, file=sys.stderr)
         return 1
     else:
         print("A-OK.")

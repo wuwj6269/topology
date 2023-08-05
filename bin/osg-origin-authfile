@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+A script to generate Authfiles for XCaches in the OSG
+"""
+import argparse
+import os
+import sys
+
+if __name__ == "__main__" and __package__ is None:
+    _parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(_parent + "/src")
+
+
+import webapp.models
+import stashcache
+
+parser = argparse.ArgumentParser(description="Generate an Xrootd Authfile appropriate for a given origin.")
+parser.add_argument("--public", action="store_true", help="Generate a public origin Authfile")
+parser.add_argument("fqdn", metavar="Origin_FQDN", nargs=1, help="FQDN of the origin for Authfile generation.")
+
+args = parser.parse_args()
+
+global_data = webapp.models.GlobalData()
+
+authfile = stashcache.generate_origin_authfile(global_data, args.fqdn[0], suppress_errors=False,
+                                               public_origin=args.public)
+
+print(authfile, end="")

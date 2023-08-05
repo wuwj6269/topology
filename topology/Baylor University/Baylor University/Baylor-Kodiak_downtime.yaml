@@ -1,0 +1,44 @@
+- Class: SCHEDULED
+  ID: 636510655
+  Description: Test of registering downtime
+  Severity: No Significant Outage Expected
+  StartTime: Aug 30, 2020 01:00 +0000
+  EndTime: Aug 30, 2020 02:00 +0000
+  CreatedTime: Aug 28, 2020 16:44 +0000
+  ResourceName: Baylor-Kodiak-CE
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 918399645
+  Description: The site is down due to the storage system issue.
+  Severity: Outage
+  StartTime: Jul 07, 2021 09:00 +0000
+  EndTime: Jul 23, 2021 09:00 +0000
+  CreatedTime: Jul 21, 2021 03:59 +0000
+  ResourceName: Baylor-Kodiak-CE
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1523857764
+  Description: Downtime for OSG software update
+  Severity: Intermittent Outage
+  StartTime: Jun 22, 2023 13:00 +0000
+  EndTime: Jun 22, 2023 16:00 +0000
+  CreatedTime: Jun 21, 2023 22:16 +0000
+  ResourceName: Baylor-Kodiak-CE
+  Services:
+  - CE
+# ---------------------------------------------------------
+- Class: UNSCHEDULED
+  ID: 1553875428
+  Description: Switching to new server
+  Severity: Intermittent Outage
+  StartTime: Jul 26, 2023 16:15 +0000
+  EndTime: Jul 26, 2023 16:45 +0000
+  CreatedTime: Jul 26, 2023 16:05 +0000
+  ResourceName: Baylor-Kodiak-CE
+  Services:
+  - CE
+# ---------------------------------------------------------

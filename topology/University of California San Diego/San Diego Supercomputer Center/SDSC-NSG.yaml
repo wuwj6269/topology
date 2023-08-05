@@ -1,0 +1,32 @@
+---
+Production: true
+SupportCenter: Self Supported
+GroupDescription: Resources related at SDSC for the Neuroscience Gateway
+GroupID: 1130
+Resources:
+  SDSC-NSG-AP1:
+    Active: true
+    Description: The Neuroscience gateway access point for the OS Pool
+    ID: 1215
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          Name: Marty Kandes
+          ID: 5cb19c49b0d5fff51f9bff3827f1be928303a54b
+      Security Contact:
+        Primary:
+        Primary:
+          Name: Marty Kandes
+          ID: 5cb19c49b0d5fff51f9bff3827f1be928303a54b
+    FQDN: nsgosg.sdsc.edu
+    Services:
+      Submit Node:
+        Description: OS Pool access point for NSG
+      XRootD origin server:
+        Description: OSDF origin server for NSG
+    AllowedVOs:
+      - ANY
+    DN: /DC=org/DC=incommon/C=US/ST=California/O="University of California, San Diego"/CN=nsgosg.sdsc.edu
+    Tags:
+      - OSPool
+

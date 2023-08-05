@@ -1,8 +1,49 @@
-Disable: false
 GroupDescription: IceCube cluster
 GroupID: 437
 Production: true
 Resources:
+  IceCube_StashCache_origin:
+    Active: True
+    Description: StashCache origin server for IceCube
+    FQDN: stash-origin.icecube.wisc.edu
+    ID: 1106
+    Services: 
+      XRootD origin server:
+        Description: StashCache origin server
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+      Security Contact:
+        Primary:
+          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
+          Name: Steve Barnet
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+    AllowedVOs:
+      - IceCube
+  IceCube_Squid:
+    Active: true
+    Description: Round robin DNS alias for our Frontier Squid nodes.
+    FQDN: squid.icecube.wisc.edu
+    ID: 987
+    Services:
+      Squid:
+        Description: Generic squid service
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+      Security Contact:
+        Primary:
+          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
+          Name: Steve Barnet
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
   IceCube-submit-1:
     Active: true
     ContactLists:
@@ -10,38 +51,14 @@ Resources:
         Primary:
           ID: bc87af94d3512f536e417f1e45808b975fb2874f
           Name: Vladimir Brik
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-      Miscellaneous Contact:
-        Primary:
-          ID: bc87af94d3512f536e417f1e45808b975fb2874f
-          Name: Vladimir Brik
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Tertiary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
-      Resource Report Contact:
-        Primary:
-          ID: bc87af94d3512f536e417f1e45808b975fb2874f
-          Name: Vladimir Brik
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Tertiary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
       Security Contact:
         Primary:
           ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
           Name: Steve Barnet
         Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
     Description: This is a submit node for the IceCube collaboration.
-    Disable: false
     FQDN: sub-1.icecube.wisc.edu
     ID: 792
     Services:
@@ -56,40 +73,16 @@ Resources:
     ContactLists:
       Administrative Contact:
         Primary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Secondary:
           ID: bc87af94d3512f536e417f1e45808b975fb2874f
           Name: Vladimir Brik
-      Miscellaneous Contact:
-        Primary:
-          ID: bc87af94d3512f536e417f1e45808b975fb2874f
-          Name: Vladimir Brik
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Tertiary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
-      Resource Report Contact:
-        Primary:
-          ID: bc87af94d3512f536e417f1e45808b975fb2874f
-          Name: Vladimir Brik
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Tertiary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
       Security Contact:
         Primary:
           ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
           Name: Steve Barnet
         Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
     Description: This is a submit node at UW for IceCube simulation production.
-    Disable: false
     FQDN: sub-simprod.icecube.wisc.edu
     ID: 793
     Services:
@@ -99,6 +92,64 @@ Resources:
           hidden: true
     VOOwnership:
       IceCube: 100
+  IceCube-sub-grid-test:
+    Active: true
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          ID: OSG1000039
+          Name: David Schultz
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+      Security Contact:
+        Primary:
+          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
+          Name: Steve Barnet
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+    Description: This is a test submit node for the IceCube collaboration.
+    FQDN: sub-grid-test.icecube.wisc.edu
+    ID: 1369
+    Services:
+      Submit Node:
+        Description: OSG Submission Node
+        Details:
+          hidden: false
+    VOOwnership:
+      IceCube: 100
+    Tags:
+      - OSPool
+  IceCube-sub-2:
+    Active: true
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          ID: OSG1000039
+          Name: David Schultz
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+      Security Contact:
+        Primary:
+          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
+          Name: Steve Barnet
+        Secondary:
+          ID: bc87af94d3512f536e417f1e45808b975fb2874f
+          Name: Vladimir Brik
+    Description: This is a submit node for the IceCube collaboration.
+    FQDN: sub-2.icecube.wisc.edu
+    ID: 1322
+    Services:
+      Submit Node:
+        Description: OSG Submission Node
+        Details:
+          hidden: false
+    VOOwnership:
+      IceCube: 100
+    Tags:
+      - OSPool
   NPX:
     Active: true
     ContactLists:
@@ -109,26 +160,6 @@ Resources:
         Secondary:
           ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
           Name: Steve Barnet
-      Miscellaneous Contact:
-        Primary:
-          ID: 974fc4fd682299b8f87f1733b831cfd4ea90e649
-          Name: Alec Sheperd
-        Secondary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
-        Tertiary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-      Resource Report Contact:
-        Primary:
-          ID: 974fc4fd682299b8f87f1733b831cfd4ea90e649
-          Name: Alec Sheperd
-        Secondary:
-          ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-          Name: Gonzalo Merino
-        Tertiary:
-          ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
-          Name: Steve Barnet
       Security Contact:
         Primary:
           ID: 974fc4fd682299b8f87f1733b831cfd4ea90e649
@@ -137,7 +168,6 @@ Resources:
           ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
           Name: Steve Barnet
     Description: IceCube's NPX cluster
-    Disable: false
     FQDN: osg-ce.icecube.wisc.edu
     ID: 779
     Services:

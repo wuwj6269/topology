@@ -1,0 +1,72 @@
+# Production is true if the resource is for production and not testing use
+Production: true
+# SupportCenter is one of the support centers in topology/support-centers.yaml
+SupportCenter: Community Support Center
+
+# GroupDescription is a long description of the resource group; may be multiple lines.
+GroupDescription: Compute infrastructure at SDSC
+
+# If you have an up-to-date local git clone, fill GroupID with the output from `bin/next_resource_group_id`
+# Otherwise, leave it blank and we will fill in the appropriate value for you.
+GroupID: 496
+
+# Resources contains one or more resources in this
+# ResourceGroup. A resource provides one or more services
+Resources:
+  # Resource Name should be a short descriptor of the resource.
+  SDSC-PRP-CE1:
+    Active: false
+    Description: SDSC CE and gridFTP into PRP resources
+    ID: 984
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          Name: Igor Sfiligoi
+          ID: 593daf4f680b3135849201036e1055f03f89cfac
+        Secondary:
+          ID: bc36e7fe84fffcb5cf195fe09cc42336f5cd5d1f
+          Name: Diego Davila
+
+      Security Contact:
+        Primary:
+          Name: Igor Sfiligoi
+          ID: 593daf4f680b3135849201036e1055f03f89cfac
+
+    # called xcache-11 for historical reasons but it is actually a CE
+    FQDN: xcache-11.t2.ucsd.edu
+    Services:
+      CE:
+        Description: Compute Element
+        Details:
+          hidden: false
+          sam_uri: htcondor://xcache-11.t2.ucsd.edu
+      GridFtp:
+        Description: GridFtp Storage Element
+        Details:
+          hidden: false
+  SDSC-PRP-OSPool-Provisioner:
+    Active: true
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          Name: Igor Sfiligoi
+          ID: 593daf4f680b3135849201036e1055f03f89cfac
+        Secondary:
+          Name: Jeffrey Michael Dost
+          ID: 3a8eb6436a8b78ca50f7e93bb2a4d1f0141212ba
+        Tertiary:
+          ID: 38cd7e4efcb45e2aff808b98f5f928c96b3a8608
+          Name: Mats Rynge
+      Security Contact:
+        Primary:
+          Name: Igor Sfiligoi
+          ID: 593daf4f680b3135849201036e1055f03f89cfac
+        Secondary:
+          Name: Jeffrey Michael Dost
+          ID: 3a8eb6436a8b78ca50f7e93bb2a4d1f0141212ba
+    Description: Direct provisioning of the PRP Kubernetes cluster for OSPool, in the osg-opportunistic namespace
+    FQDN: direct-provisioner.osg-opportunistic.pacificresearchplatform.org
+    ID: 1309
+    Services:
+      Execution Endpoint:
+        Description: Direct provisioning of the PRP Kubernetes cluster for OSPool, in the osg-opportunistic namespace

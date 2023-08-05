@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-from __future__ import print_function
+#!/usr/bin/env python3
 
 import time
 import sys
@@ -38,7 +36,7 @@ def validate_xml(xml_fname):
     if errors:
         print("%d time format error(s)" % len(errors))
         for e in errors:
-            print("Invalid time format: '%s'" % e, file=sys.stderr)
+            print("ERROR: Invalid time format: '%s'" % e, file=sys.stderr)
         return 1
     else:
         print("A-OK")

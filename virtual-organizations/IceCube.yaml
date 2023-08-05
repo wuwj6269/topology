@@ -5,8 +5,6 @@ Contacts:
   Administrative Contact:
   - ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
     Name: Steve Barnet
-  - ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-    Name: Gonzalo Merino
   Miscellaneous Contact:
   - ID: c7200cc00194ee2bedfe79f0b3a6af20bc905aef
     Name: Juan Carlos Diaz Velez
@@ -15,21 +13,19 @@ Contacts:
     Name: Steve Barnet
   - ID: bc87af94d3512f536e417f1e45808b975fb2874f
     Name: Vladimir Brik
-  - ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-    Name: Gonzalo Merino
   Security Contact:
   - ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
     Name: Steve Barnet
-  - ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-    Name: Gonzalo Merino
   Sponsors:
   - ID: c7200cc00194ee2bedfe79f0b3a6af20bc905aef
     Name: Juan Carlos Diaz Velez
   VO Manager:
   - ID: 67523ec91c983a4c0c1c576beeac1037aa863da3
     Name: Steve Barnet
-  - ID: 3fbb3d844448b2df9802a4aef8294f83785d090c
-    Name: Gonzalo Merino
+Credentials:
+  TokenIssuers:
+    - URL: https://chtc.cs.wisc.edu/icecube
+      DefaultUnixUser: icecube
 Disable: false
 FieldsOfScience:
   PrimaryFields:
@@ -44,8 +40,56 @@ MembershipServicesURL: http://www.icecube.wisc.edu/collaboration/aup.php
 OASIS:
   OASISRepoURLs:
   - http://cvmfs-stratum0.wipac.wisc.edu/cvmfs/icecube.opensciencegrid.org
-  UseOASIS: true
+  - http://hcc-cvmfs-repo.unl.edu:8000/cvmfs/icecube.osgstorage.org
+  UseOASIS: false
 PrimaryURL: https://grid-voms.desy.de:8443/voms/icecube/
 PurposeURL: http://www.icecube.wisc.edu/
 ReportingGroups:
 - IceCube
+
+DataFederations:
+  StashCache:
+    Namespaces:
+      - Path: /icecube/PUBLIC
+        Authorizations:
+          - PUBLIC
+        AllowedCaches:
+          - ANY
+        AllowedOrigins:
+          - IceCube_StashCache_origin
+          
+      - Path: /icecube/production/nrpnb/protected
+        Authorizations:
+          - SciTokens:
+              Issuer: https://chtc.cs.wisc.edu/icecube
+              Base Path: /icecube
+              Map Subject: False
+        AllowedOrigins:
+          - NEBRASKA_NRP_OSDF_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://unl-origin.nationalresearchplatform.org:1095
+         
+      - Path: /icecube/production/mghpcc/protected/
+        Authorizations:
+          - SciTokens:
+              Issuer: https://chtc.cs.wisc.edu/icecube
+              Base Path: /icecube
+              Map Subject: False
+        AllowedOrigins:
+          - MGHPCC_NRP_OSDF_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: https://mghpcc-origin.nationalresearchplatform.org:1095
+
+      - Path: /icecube/production/sdsc/protected/
+        Authorizations:
+          - SciTokens:
+              Issuer: https://chtc.cs.wisc.edu/icecube
+              Base Path: /icecube
+              Map Subject: False
+        AllowedOrigins:
+          - SDSC_NRP_OSDF_ORIGIN
+        AllowedCaches:
+          - ANY
+        Writeback: http://sdsc-origin.nationalresearchplatform.org:1095

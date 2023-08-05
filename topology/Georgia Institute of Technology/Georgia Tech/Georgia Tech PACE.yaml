@@ -1,47 +1,37 @@
-Disable: false
 GroupDescription: Resources in the Georgia Tech PACE cluster, to be used by LIGO.
 GroupID: 423
 Production: true
 Resources:
   Georgia_Tech_PACE_CE_1:
-    Active: true
+    Active: false
     ContactLists:
       Administrative Contact:
         Primary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
         Secondary:
           ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
           Name: Mehmet Belgin
-      Miscellaneous Contact:
-        Primary:
-          ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
-          Name: Peter Couvares
-        Secondary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
         Tertiary:
-          ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
-          Name: Mehmet Belgin
-      Resource Report Contact:
-        Primary:
-          ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
-          Name: Peter Couvares
-        Secondary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
-        Tertiary:
-          ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
-          Name: Mehmet Belgin
+          ID: OSG1000313
+          Name: Eric Coulter
+        Tertiary 2:
+          ID: 068fa784cd29b5aee10ccce2669a95cbaa66d88b
+          Name: Ruben Lara
+        Tertiary 3:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
       Security Contact:
         Primary:
           ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
           Name: Peter Couvares
         Secondary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
+        Tertiary:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
     Description: This is a Condor CE in front of the PACE cluster, for use by LIGO.
-    Disable: false
     FQDN: osg-sched.pace.gatech.edu
     ID: 734
     Services:
@@ -54,44 +44,91 @@ Resources:
     VOOwnership:
       LIGO: 100
   Georgia_Tech_PACE_GridFTP:
-    Active: true
+    Active: false
     ContactLists:
       Administrative Contact:
         Primary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
         Secondary:
           ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
           Name: Mehmet Belgin
-      Miscellaneous Contact:
-        Primary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
-        Secondary:
-          ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
-          Name: Mehmet Belgin
-      Resource Report Contact:
-        Secondary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
         Tertiary:
-          ID: 60aadecab2baceb94cd6cfdbf600a64581ba6af2
-          Name: Mehmet Belgin
+          ID: OSG1000313
+          Name: Eric Coulter
+        Tertiary 2:
+          ID: 068fa784cd29b5aee10ccce2669a95cbaa66d88b
+          Name: Ruben Lara
+        Tertiary 3:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
       Security Contact:
         Primary:
           ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
           Name: Peter Couvares
         Secondary:
-          ID: bce6aa9f33442110ab7554a8bf716ab80ed7bef5
-          Name: Paul Manno
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
+        Tertiary:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
     Description: GridFTP server, initially for incoming LIGO frame data pushed from
       CIT.
-    Disable: false
     FQDN: osg-gftp.pace.gatech.edu
+    DN:  /DC=org/DC=incommon/C=US/ST=Georgia/L=Atlanta/O=Georgia Institute of Technology/OU=Office of Information Technology/CN=osg-gftp.pace.gatech.edu
     ID: 737
     Services:
       GridFtp:
         Description: GridFtp Storage Element
+        Details:
+          hidden: false
+      XRootD cache server:
+        Description: Georgia Tech Caching Server
+    AllowedVOs:
+      - LIGO
+    VOOwnership:
+      LIGO: 100
+  Georgia_Tech_LIGO_Submit_1:
+    Active: false
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
+          Name: Peter Couvares
+        Secondary:
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
+        Tertiary:
+          ID: OSG1000313
+          Name: Eric Coulter
+        Tertiary 2:
+          ID: 068fa784cd29b5aee10ccce2669a95cbaa66d88b
+          Name: Ruben Lara
+        Tertiary 3:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
+      Security Contact:
+        Primary:
+          ID: 547c65a6ed5e9e755c023418a47b8b92e88f0523
+          Name: Peter Couvares
+        Secondary:
+          ID: 6782bb78755f1c9464843722cdd43b4cb8c51a63
+          Name: Trever Nightingale
+        Tertiary:
+          ID: OSG1000313
+          Name: Eric Coulter
+        Tertiary 2:
+          ID: 068fa784cd29b5aee10ccce2669a95cbaa66d88b
+          Name: Ruben Lara
+        Tertiary 3:
+          ID: efbe08500c5999660418137fe2651dd5ce295eba
+          Name: Semir Sarajlic
+    Description: Georgia Tech submit node for LIGO.
+    FQDN: ligo-6.pace.gatech.edu
+    ID: 736
+    Services:
+      Submit Node:
+        Description: OSG Submission Node
         Details:
           hidden: false
     VOOwnership:

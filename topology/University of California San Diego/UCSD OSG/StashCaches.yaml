@@ -1,0 +1,29 @@
+Production: true
+SupportCenter: Community Support Center
+GroupDescription: Stashcaches located at UCSD or SDSC
+GroupID: 499
+Resources:
+  Stashcache-UCSD:
+    Active: true
+    Description: UCSD main stashcache
+    ID: 988
+    ContactLists:
+      Administrative Contact:
+        Primary:
+          Name: Fabio Andrijauskas
+          ID: OSG1000162
+        Secondary:
+          Name: Terrence Martin
+          ID: 876425696868c8a32fa1b8ee1db792b5c76a9f37
+      # Security Contact is one to three people to contact regarding security issues
+      Security Contact:
+        Primary:
+          Name: Terrence Martin
+          ID: 876425696868c8a32fa1b8ee1db792b5c76a9f37
+    FQDN: stashcache.t2.ucsd.edu
+    DN: /DC=org/DC=incommon/C=US/ST=California/O=University of California, San Diego/CN=stashcache.t2.ucsd.edu
+    Services:
+      XRootD cache server:
+        Description: UCSD Stashcache Caching Server
+    AllowedVOs:
+      - ANY

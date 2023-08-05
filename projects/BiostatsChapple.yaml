@@ -1,0 +1,11 @@
+Description: Bayesian Clinical Trials
+Department: Biostatistics
+FieldOfScience: Statistics
+Organization: LSU School of Public Health
+PIName: Andrew Chapple
+
+ID: '532'
+
+Sponsor:
+  CampusGrid:
+    Name: OSG Connect

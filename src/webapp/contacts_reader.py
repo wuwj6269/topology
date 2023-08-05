@@ -5,13 +5,13 @@ import hashlib
 from logging import getLogger
 import os
 import sys
-from typing import Dict
+from typing import Dict, Optional
 
 # thanks stackoverflow
 if __name__ == "__main__" and __package__ is None:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from webapp.common import MaybeOrderedDict, to_xml, MISCUSER_SCHEMA_URL, load_yaml_file
+from webapp.common import to_xml, MISCUSER_SCHEMA_URL, load_yaml_file
 
 
 log = getLogger(__name__)
@@ -22,7 +22,7 @@ class User(object):
         self.id = id_
         self.yaml_data = yaml_data
 
-    def get_tree(self, authorized=False, filters=None) -> MaybeOrderedDict:
+    def get_tree(self, authorized=False, filters=None) -> Optional[OrderedDict]:
         tree = OrderedDict()
         tree["FullName"] = self.yaml_data["FullName"]
         tree["ID"] = self.id
@@ -31,6 +31,9 @@ class User(object):
             self.yaml_data["ContactInformation"]["PrimaryEmail"])
         tree["Profile"] = self.yaml_data.get("Profile", None)
         tree["GitHub"] = self.yaml_data.get("GitHub", None)
+        tree["CILogonID"] = self.yaml_data.get("CILogonID", None)
+        if self.yaml_data.get("Flags"):
+            tree["Flags"] = {"Flag": self.yaml_data["Flags"]}
         if authorized:
             tree["ContactInformation"] = self._expand_contact_info()
         return tree
@@ -55,6 +58,10 @@ class User(object):
     def dns(self):
         dns = self.yaml_data["ContactInformation"].get("DNs", None)
         return dns
+
+    @property
+    def cilogon_id(self):
+        return self.yaml_data.get("CILogonID", None)
 
     @staticmethod
     def _get_gravatar_url(email):
@@ -103,7 +110,7 @@ class ContactsData(object):
             try:
                 user_tree = user.get_tree(authorized, filters)
             except (AttributeError, KeyError, ValueError) as err:
-                log.exception("Error adding user with id %s: err", id_, err)
+                log.exception("Error adding user with id %s: %r", id_, err)
                 continue
             if user_tree:
                 user_list.append(user_tree)
@@ -112,9 +119,43 @@ class ContactsData(object):
                  "@xsi:schemaLocation": MISCUSER_SCHEMA_URL,
                  "User": user_list}}
 
+    def without_duplicates(self):
+        data = { id_: contact
+                 for id_, contact in self.yaml_data.items()
+                 if not _id_is_duplicate(self.yaml_data, id_) }
+
+        return ContactsData(data)
+
+
+def _id_is_duplicate(data, id_):
+    contact = data[id_]
+    if 'CILogonID' not in contact:
+        return False
+    cilogonid = contact['CILogonID']
+    if cilogonid == id_:
+        return False
+    if cilogonid not in data:
+        return False
+    # require all values (recursively) to match between two contact items
+    # in order to be considered duplicate, but allow case differences
+    return _recursive_lower(data[cilogonid]) == _recursive_lower(contact)
+
+
+def _recursive_lower(x):
+    if isinstance(x, dict):
+        return { k: _recursive_lower(v) for k,v in x.items() }
+    if isinstance(x, list):
+        return list(map(_recursive_lower, x))
+    if isinstance(x, str):
+        return x.lower()
+    return x
+
 
 def get_contacts_data(infile) -> ContactsData:
-    return ContactsData(load_yaml_file(infile))
+    if infile:
+        return ContactsData(load_yaml_file(infile))
+    else:
+        return ContactsData({})
 
 
 def main(argv):

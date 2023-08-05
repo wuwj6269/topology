@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # check that hostname fqdn maps to a public IP and reverse dns matches
 
@@ -44,9 +44,10 @@ HostNetInfo = collections.namedtuple('HostNetInfo',
      'addr_is_ours', 'fqdn_reverse', 'iface_addrs')
 )
 
-def hostnetinfo_good(info):
-    return info.addr_is_public and info.addr_is_ours \
-       and info.fqdn == info.fqdn_reverse
+def hostnetinfo_good(info, bypass_dns_check=False):
+    # If the arg --bypass_dns_check is set to True we will not care about
+    # the outcome of info.addr_is_ours
+    return info.addr_is_public and (info.addr_is_ours or bypass_dns_check) and info.fqdn == info.fqdn_reverse
 
 def get_host_network_info():
     port = 25
@@ -80,6 +81,10 @@ def print_net_info(info):
     print("IPv4: %s" % info.addr)
     print("IPv4 is public? %s" % info.addr_is_public)
     print("IPv4 is ours? %s"   % info.addr_is_ours)
+    if info.addr_is_ours == False:
+        print("The IP address to wich the hostname resolves is not and assigned")
+        print("to any of the interfaces listed in this host. To skip this")
+        print("check pass the argument --bypass-dns-check to this script")
     matchstr = "match" if info.fqdn == info.fqdn_reverse else "mismatch"
     print("Reverse FQDN: %s (%s)" % (info.fqdn_reverse, matchstr))
 
@@ -270,10 +275,11 @@ def get_network_interfaces(pattern):
         retval = {}
 
         for ifa in ifap_iter(ifap):
-            name = ifa.ifa_name
-            i = retval.get(name)
+            name_bytes = ifa.ifa_name
+            name_str = name_bytes.decode('latin-1')
+            i = retval.get(name_str)
             if not i:
-                i = retval[name] = NetworkInterface(name)
+                i = retval[name_str] = NetworkInterface(name_str)
             family, addr = getfamaddr(ifa.ifa_addr.contents)
             if addr:
                 address_list = i.addresses.setdefault(family, set())
@@ -301,9 +307,9 @@ def iface_matches(network_iface, pattern):
     `network_iface` matches `pattern`, False otherwise
 
     """
-    if fnmatch.fnmatch(network_iface.name, pattern):
+    if fnmatch.fnmatch(network_iface, pattern):
         return True
-    for family, addrs in network_iface.addresses.items():
+    for _, addrs in network_iface.addresses.items():
         if fnmatch.filter(addrs, pattern):
             return True
     return False
